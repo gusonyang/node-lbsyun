@@ -10,16 +10,34 @@ var BaiduClient = require('./baidu');
  * @constructor
  */
 function LBSYunClient(options) {
-    this.platforms = [];
+    var platforms = [];
     for (var i in options.platforms) {
         switch (options.platforms[i]) {
             case 'amap':
-                this.platforms.push(new AmapClient(options.amap));
+                platforms.push(new AmapClient(options.amap));
                 break;
             case 'baidu':
-                this.platforms.push(new BaiduClient(options.baidu));
+                platforms.push(new BaiduClient(options.baidu));
                 break;
         }
+    }
+
+    /**
+     * proxy
+     * @param methodName
+     * @param params
+     */
+    this.proxy = function (methodName, params) {
+        return Promise.map(platforms, function (platform) {
+            return platform[methodName](params);
+        }, {concurrency: 1}).then(function (results) {
+            for (var i in results) {
+                if (!results[i].success) {
+                    return {success: false, message: results[i].message}
+                }
+            }
+            return {success: true};
+        });
     }
 }
 
@@ -27,17 +45,14 @@ function LBSYunClient(options) {
  * create tables
  */
 LBSYunClient.prototype.initDatabase = function (tables) {
-    var platforms = this.platforms;
-    return Promise.map(platforms, function (platform) {
-        return platform.initDatabase(tables);
-    }, {concurrency: 2}).then(function (results) {
-        for (var i in results) {
-            if (!results[i].success) {
-                return {success: false, message: results[i].message}
-            }
-        }
-        return {success: true};
-    });
+    return this.proxy('initDatabase', tables);
+}
+
+/**
+ * 创建地点
+ */
+LBSYunClient.prototype.createPois = function (pois) {
+    return this.proxy('createPois', pois);
 }
 
 /**

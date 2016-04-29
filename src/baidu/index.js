@@ -72,6 +72,32 @@ BaiduClient.prototype.initDatabase = function (tables) {
 }
 
 /**
+ * createPois
+ * @param pois
+ */
+BaiduClient.prototype.createPois = function (pois) {
+    var ak = this.options.ak;
+    return Promise.map(pois, function (poi) {
+        var opt = 'poi/create';
+        poi.ak = ak;
+        return request.post(BAIDU_HOST + opt, poi).then(function (result) {
+            if (result.status === 0) {
+                return {success: true};
+            } else {
+                return {success: false, opt: opt, data: poi, message: result};
+            }
+        });
+    }, {concurrency: 1}).then(function (results) {
+        for (var i in results) {
+            if (!results[i].success) {
+                return {success: false, message: results[i].message}
+            }
+        }
+        return {success: true};
+    });
+}
+
+/**
  * BaiduClient
  * @type {BaiduClient}
  */
