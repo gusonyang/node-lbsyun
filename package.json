@@ -1,0 +1,19 @@
+{
+  "name": "lbsyun",
+  "version": "0.1.0",
+  "main": "src/lbsyun.js",
+  "scripts": {},
+  "author": {
+    "name": "Guson Yang",
+    "email": "gusonyang@qq.com"
+  },
+  "dependencies": {
+    "bluebird": "^3.3.5",
+    "lodash": "^4.11.1",
+    "ngeohash": "^0.6.0",
+    "request": "^2.72.0"
+  },
+  "devDependencies": {
+    "assert": "^1.3.0"
+  }
+}
